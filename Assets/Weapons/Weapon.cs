@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 
 public class Weapon : MonoBehaviour
 {
+    private const string SHOOT_ACTION = "Shoot";
+
     [SerializeField] private PlayerInput playerInput;
     [SerializeField] private Camera FPCamera;
     [SerializeField] private ParticleSystem muzzleFlashVFX;
@@ -12,24 +14,39 @@ public class Weapon : MonoBehaviour
     [SerializeField] private GameObject hitVFXGameObject;
     [SerializeField] private float range = 100f;
     [SerializeField] private float damage = 25f;
+    [SerializeField] private float rof = 1f;
     [SerializeField] private float flashOn = 0.2f;
+    [SerializeField] private Ammo ammoSlot;
+    [SerializeField] private AmmoType ammoType;
+
+    private bool canShoot = true;
     
 
     private void OnEnable() {
-        playerInput.actions["Shoot"].performed += Weapon_performed;
+        playerInput.actions[SHOOT_ACTION].performed += Weapon_performed;
+        canShoot = true;
     }
 
     private void OnDisable() {
-        playerInput.actions["Shoot"].performed -= Weapon_performed;
+        playerInput.actions[SHOOT_ACTION].performed -= Weapon_performed;
     }
 
     private void Weapon_performed(InputAction.CallbackContext obj) {
-        Shoot();
+        if (canShoot) {
+            StartCoroutine(Shoot());
+        }
     }
 
-    private void Shoot() {
-        StartCoroutine(PlayMuzzleFlash());
-        ProcessRaycast();
+    private IEnumerator Shoot() {
+        canShoot = false;
+        if (ammoSlot.GetCurrentAmmo(ammoType) > 0) {
+            StartCoroutine(PlayMuzzleFlash());
+            ProcessRaycast();
+            ammoSlot.ReduceCurrentAmmo(ammoType);
+        }
+
+        yield return new WaitForSeconds(rof);
+        canShoot = true;
     }
 
     private IEnumerator PlayMuzzleFlash() {

@@ -23,6 +23,8 @@ public class WeaponZoom : MonoBehaviour
 
     private void OnDisable() {
         playerInput.actions["Zoom"].performed -= WeaponZoom_performed;
+        SetFOV(originalFOV);
+        SetSensitivity(originalSensitivity);
     }
 
     private void WeaponZoom_performed(InputAction.CallbackContext obj) {

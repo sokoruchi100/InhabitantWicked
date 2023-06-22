@@ -15,13 +15,19 @@ public class EnemyAI : MonoBehaviour
     private float distanceToTarget = Mathf.Infinity;
     private bool isProvoked = false;
     private Animator animator;
+    private EnemyHealth enemyHealth;
+    private CapsuleCollider capsuleCollider;
 
     private void Start() {
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+        enemyHealth = GetComponent<EnemyHealth>();
+        capsuleCollider = GetComponent<CapsuleCollider>();
     }
 
     private void Update() {
+        
+
         distanceToTarget = Vector3.Distance(target.position, transform.position);
 
         if (isProvoked) {
@@ -33,6 +39,11 @@ public class EnemyAI : MonoBehaviour
 
     private void OnDamageTaken() {
         isProvoked = true;
+        if (enemyHealth.IsDead()) {
+            navMeshAgent.enabled = false;
+            capsuleCollider.enabled = false;
+            enabled = false;
+        }
     }
 
     private void EngageTarget() {
